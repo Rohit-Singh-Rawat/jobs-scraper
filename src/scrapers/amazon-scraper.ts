@@ -1,5 +1,5 @@
 import scraperConfig from '../config/scraper';
-import { Job } from '../types';
+import type { Job } from '../types';
 import { generateJobHash } from '../utils/hashGenerator';
 import logger from '../utils/logger';
 import { BaseScraper } from './base';
@@ -11,12 +11,12 @@ export class AmazonScraper extends BaseScraper {
 
 	private parsePostedDate(dateText: string): Date {
 		try {
-			dateText = dateText.replace('Posted ', '');
+			const NewdateText = dateText.replace('Posted ', '');
 
-			const date = new Date(dateText);
+			const date = new Date(NewdateText);
 
-			if (isNaN(date.getTime())) {
-				logger.error('Invalid date format:', dateText);
+			if (Number.isNaN(date.getTime())) {
+				logger.error('Invalid date format:', NewdateText);
 				return new Date();
 			}
 
@@ -33,16 +33,18 @@ export class AmazonScraper extends BaseScraper {
 		try {
 			const page = await this.createPage(scraperConfig.amazon.userAgent);
 
+			//used loop if u want just initial number of pages and not all
+			//remove loop if u want all pages , as if no result found it will stop automatically
+
 			for (let pageNum = 1; pageNum <= scraperConfig.amazon.maxPages; pageNum++) {
 				const offset = (pageNum - 1) * 10;
 				await page.goto(
-					`https://www.amazon.jobs/en/search?offset=${offset}&result_limit=10&sort=relevant`,
+					`${scraperConfig.amazon.baseUrl}?offset=${offset}&result_limit=10&sort=relevant`,
 					{
 						waitUntil: 'networkidle2',
 					}
 				);
 
-				let jobElements;
 				try {
 					await Promise.race([
 						page.waitForSelector('.job-tile'),
@@ -52,7 +54,7 @@ export class AmazonScraper extends BaseScraper {
 					logger.info('Timed out waiting for job elements');
 					break;
 				}
-				jobElements = await page.$$('.job-tile');
+				const jobElements = await page.$$('.job-tile');
 
 				if (!jobElements || jobElements.length === 0) {
 					logger.info('No job elements found on page, stopping scrape');
@@ -89,10 +91,14 @@ export class AmazonScraper extends BaseScraper {
 						);
 						const jobUrl = await jobElement.$eval(
 							'.job-title a',
-							(el: Element) => 'https://www.amazon.jobs' + (el.getAttribute('href') || '')
+							(el: Element) => `https://www.amazon.jobs${el.getAttribute('href') || ''}`
 						);
 
-						const uniqueIdentifier = await generateJobHash({ title, company: 'Amazon', location });
+						const uniqueIdentifier = await generateJobHash({
+							title,
+							company: 'Amazon',
+							location,
+						});
 
 						jobs.push({
 							title,
