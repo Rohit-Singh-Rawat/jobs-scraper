@@ -1,0 +1,9 @@
+dist/
+node_modules/
+logs/
+.env
+.git/
+.gitignore
+npm-debug.log
+yarn-debug.log*
+yarn-error.log*

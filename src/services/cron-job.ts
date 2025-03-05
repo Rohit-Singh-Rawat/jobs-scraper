@@ -9,7 +9,7 @@ export class CronService {
   constructor(scraperService: ScraperService, cronExpression?: string) {
     this.scraperService = scraperService;
     this.cronExpression =
-      cronExpression || process.env.SCRAPE_INTERVAL || "0 */4 * * *"; // Default: hourly
+      cronExpression || process.env.SCRAPE_INTERVAL || "0 */4 * * *"; 
   }
 
   public startCronJobs(): void {
