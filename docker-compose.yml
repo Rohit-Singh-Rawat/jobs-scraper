@@ -1,0 +1,25 @@
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    ports:
+      - '27017:27017'
+    volumes:
+      - dbdata:/data/db
+  jb_scraper:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    
+    container_name: jb_scraper
+    environment:
+      - MAX_PAGES=10
+      - MONGO_URI=mongodb://mongo:27017/jb-scraper2
+      - SCRAPE_INTERVAL="0 */2 * * *"
+    ports:
+      - '3000:3000'
+    depends_on:
+      - mongo
+
+volumes:
+  dbdata:

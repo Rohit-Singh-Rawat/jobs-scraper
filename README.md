@@ -45,4 +45,9 @@
    ```
 
 Note: The `MAX_PAGES` environment variable controls how many pages to scrape from each job board. The `SCRAPE_INTERVAL` uses cron syntax to set how often scraping occurs (default: every 2 hours).
+
+## Docker Compose
+
+   ```bash
+   docker compose up -d
    ```
